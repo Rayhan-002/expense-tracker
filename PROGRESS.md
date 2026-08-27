@@ -10,7 +10,11 @@
 
 **Housekeeping done (2026-08-27):** `.gitignore` fixed (added `db.sqlite3`, `.vscode/`), unused `db.sqlite3` deleted, `MAILERS` typo fixed to `EMAIL_BACKEND`, `backend/requirements.txt` generated (`pip freeze`), first real commit made (`a8f23af` — Django+DRF backend with Category/Expense models on PostgreSQL). `.vscode/` deliberately left untracked (local editor/extension state, not shared project config).
 
-**Next step:** Start Phase 3 — serializers → views → urls → CRUD for `Category`/`Expense`, with validation and user-ownership permissions.
+**Phase 3 core work is done and verified (2026-08-28):** `expenses/serializers.py` (CategorySerializer, ExpenseSerializer), `expenses/views.py` (generic ListCreateAPIView/RetrieveUpdateDestroyAPIView pairs for both models, `IsAuthenticated`, per-user `get_queryset()` filtering, `perform_create()` auto-assigning `user`), `expenses/urls.py` + wired into `config/urls.py` under `/api/`. Tested live via the DRF browsable API: create/list/retrieve/update all confirmed working; anonymous requests correctly get `403`; cross-user category assignment on `Expense` is blocked both by a scoped serializer field queryset and a custom `validate_category` check. Django admin also has both models registered now, and a second (staff) test user exists for cross-user testing.
+
+**Not yet built:** registration/login/JWT endpoints (Phase 4), the `/api/dashboard/` endpoint (later phase), and formal test coverage (Phase 8).
+
+**Next step:** Start Phase 4 — Authentication (registration, login, JWT, protected routes proper). Right now auth for testing relies on Django's session login via `/admin/`, which won't work for a separate Next.js frontend — Phase 4 replaces this with real token-based auth.
 
 ## Project context
 
@@ -32,7 +36,7 @@ Frontend: Next.js + TypeScript + Tailwind · Backend: Django + DRF · Database: 
 
 - [~] **Phase 1 — Foundation**: Git init, Django setup, env config (.env + python-dotenv) done · Next.js setup still pending
 - [x] **Phase 2 — Database**: models, migrations, relationships, constraints done · now on PostgreSQL
-- [ ] **Phase 3 — Backend**: DRF serializers, views, urls, CRUD APIs, validation, permissions
+- [x] **Phase 3 — Backend**: DRF serializers, views, urls, CRUD APIs, validation, permissions — done and tested
 - [ ] **Phase 4 — Authentication**: registration, login, JWT, protected routes, user ownership
 - [ ] **Phase 5 — Frontend**: Next.js structure, pages, components, forms, API client, auth UI
 - [ ] **Phase 6 — Integration**: frontend ↔ API, error handling, loading states, optimistic updates
@@ -58,4 +62,5 @@ Dashboard: `GET /api/dashboard/`
 
 ## Session log
 
-- **2026-08-27** — Claude Code reviewed the existing scaffold, confirmed the gaps above, created this progress file. Switched database to PostgreSQL (local install, dedicated `expense_user`/`expense_tracker_db`, `.env` + `python-dotenv`), completed housekeeping, made the first real commit. Next: Phase 3 (DRF serializers/views/urls).
+- **2026-08-27** — Claude Code reviewed the existing scaffold, confirmed the gaps above, created this progress file. Switched database to PostgreSQL (local install, dedicated `expense_user`/`expense_tracker_db`, `.env` + `python-dotenv`), completed housekeeping, made the first real commit. Merged `dev` into `main` as a checkpoint.
+- **2026-08-28** — Built and tested Phase 3 (DRF serializers, views, urls, CRUD, validation, permissions) for `Category`/`Expense`. Verified live via the browsable API with two test users. Not yet committed. Next: Phase 4 (registration/login/JWT).

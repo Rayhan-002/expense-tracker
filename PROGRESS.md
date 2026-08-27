@@ -8,9 +8,9 @@
 
 **Work mode (decided 2026-08-27):** Claude explains and hands over small code snippets and exact terminal commands; the user types/pastes code themselves and runs all commands themselves, then reports back output. Claude does not directly edit application code files (Python/TS) or run terminal commands on this project — only this PROGRESS.md is edited directly. (One documented exception: Claude fixed a PATH/env issue directly when explicitly asked to, since it was pure environment troubleshooting, not learning content.)
 
-**Next steps, in order:**
-1. Housekeeping: fix `.gitignore` (add `db.sqlite3`, delete the unused file), fix the `MAILERS` setting mistake (should be `EMAIL_BACKEND`) in `backend/config/settings.py`, generate `requirements.txt`, make a first real commit.
-2. Start Phase 3: serializers → views → urls → CRUD for `Category`/`Expense`, with validation and user-ownership permissions.
+**Housekeeping done (2026-08-27):** `.gitignore` fixed (added `db.sqlite3`, `.vscode/`), unused `db.sqlite3` deleted, `MAILERS` typo fixed to `EMAIL_BACKEND`, `backend/requirements.txt` generated (`pip freeze`), first real commit made (`a8f23af` — Django+DRF backend with Category/Expense models on PostgreSQL). `.vscode/` deliberately left untracked (local editor/extension state, not shared project config).
+
+**Next step:** Start Phase 3 — serializers → views → urls → CRUD for `Category`/`Expense`, with validation and user-ownership permissions.
 
 ## Project context
 
@@ -58,4 +58,4 @@ Dashboard: `GET /api/dashboard/`
 
 ## Session log
 
-- **2026-08-27** — Claude Code reviewed the existing scaffold, confirmed the gaps above, created this progress file.
+- **2026-08-27** — Claude Code reviewed the existing scaffold, confirmed the gaps above, created this progress file. Switched database to PostgreSQL (local install, dedicated `expense_user`/`expense_tracker_db`, `.env` + `python-dotenv`), completed housekeeping, made the first real commit. Next: Phase 3 (DRF serializers/views/urls).

@@ -12,9 +12,18 @@
 
 **Phase 3 core work is done and verified (2026-08-28):** `expenses/serializers.py` (CategorySerializer, ExpenseSerializer), `expenses/views.py` (generic ListCreateAPIView/RetrieveUpdateDestroyAPIView pairs for both models, `IsAuthenticated`, per-user `get_queryset()` filtering, `perform_create()` auto-assigning `user`), `expenses/urls.py` + wired into `config/urls.py` under `/api/`. Tested live via the DRF browsable API: create/list/retrieve/update all confirmed working; anonymous requests correctly get `403`; cross-user category assignment on `Expense` is blocked both by a scoped serializer field queryset and a custom `validate_category` check. Django admin also has both models registered now, and a second (staff) test user exists for cross-user testing.
 
-**Not yet built:** registration/login/JWT endpoints (Phase 4), the `/api/dashboard/` endpoint (later phase), and formal test coverage (Phase 8).
+**Phase 4 progress (2026-08-30):** installed `djangorestframework-simplejwt`, added `REST_FRAMEWORK.DEFAULT_AUTHENTICATION_CLASSES` (JWT + Session fallback) in `settings.py`, wired `POST /api/auth/login/` (`TokenObtainPairView`) and `POST /api/auth/refresh/` (`TokenRefreshView`) directly in `config/urls.py`. Both tested and confirmed working via Postman — login returns access+refresh tokens, refresh returns a new access token, and `GET /api/categories/` was confirmed reachable using only a `Bearer` token (no session cookie), proving JWT auth works end-to-end.
 
-**Next step:** Start Phase 4 — Authentication (registration, login, JWT, protected routes proper). Right now auth for testing relies on Django's session login via `/admin/`, which won't work for a separate Next.js frontend — Phase 4 replaces this with real token-based auth.
+Created a new `accounts` app (registered in `INSTALLED_APPS`) specifically for user-account logic, kept separate from the `expenses` domain app. Wrote `backend/accounts/serializers.py` with `RegisterSerializer` (uses `User.objects.create_user()` so passwords are hashed, `password` field is `write_only`, uses Django's `validate_password`).
+
+**Not yet done — pick up here next:**
+1. `backend/accounts/views.py` — add a `RegisterView(generics.CreateAPIView)` using `RegisterSerializer`, with `permission_classes = [permissions.AllowAny]` (registration must be open to logged-out users).
+2. `backend/accounts/urls.py` (new file) — `path('register/', RegisterView.as_view(), name='register')`.
+3. Wire into `backend/config/urls.py` via `path('api/auth/', include('accounts.urls'))`.
+4. Test `POST /api/auth/register/` via Postman, then confirm the new user can log in via `/api/auth/login/`.
+5. Once registration works, Phase 4 is essentially complete — move to Phase 5 (Next.js frontend).
+
+**Testing setup (for reference):** using Postman, collection organized in resource-based folders (`Auth`, `Categories`, `Expenses`), an environment variable `base_url_expense_tracker` = `http://127.0.0.1:8000`, and a Tests script on the login request that auto-saves `access`/`refresh` into environment variables `access_token`/`refresh_token` for reuse in other requests.
 
 ## Project context
 
@@ -37,7 +46,7 @@ Frontend: Next.js + TypeScript + Tailwind · Backend: Django + DRF · Database: 
 - [~] **Phase 1 — Foundation**: Git init, Django setup, env config (.env + python-dotenv) done · Next.js setup still pending
 - [x] **Phase 2 — Database**: models, migrations, relationships, constraints done · now on PostgreSQL
 - [x] **Phase 3 — Backend**: DRF serializers, views, urls, CRUD APIs, validation, permissions — done and tested
-- [ ] **Phase 4 — Authentication**: registration, login, JWT, protected routes, user ownership
+- [~] **Phase 4 — Authentication**: login, JWT, protected routes, user ownership all done and tested · registration in progress (serializer written, view/urls not wired yet)
 - [ ] **Phase 5 — Frontend**: Next.js structure, pages, components, forms, API client, auth UI
 - [ ] **Phase 6 — Integration**: frontend ↔ API, error handling, loading states, optimistic updates
 - [ ] **Phase 7 — Features**: search, filtering, sorting, pagination, dashboard, statistics
@@ -63,4 +72,5 @@ Dashboard: `GET /api/dashboard/`
 ## Session log
 
 - **2026-08-27** — Claude Code reviewed the existing scaffold, confirmed the gaps above, created this progress file. Switched database to PostgreSQL (local install, dedicated `expense_user`/`expense_tracker_db`, `.env` + `python-dotenv`), completed housekeeping, made the first real commit. Merged `dev` into `main` as a checkpoint.
-- **2026-08-28** — Built and tested Phase 3 (DRF serializers, views, urls, CRUD, validation, permissions) for `Category`/`Expense`. Verified live via the browsable API with two test users. Not yet committed. Next: Phase 4 (registration/login/JWT).
+- **2026-08-28** — Built and tested Phase 3 (DRF serializers, views, urls, CRUD, validation, permissions) for `Category`/`Expense`. Verified live via the browsable API with two test users. Committed, pushed, merged into `main`.
+- **2026-08-30** — Built and tested JWT login + refresh (Phase 4). Started registration: created `accounts` app, wrote `RegisterSerializer`. Pausing here to work on another project — resume at the "Not yet done" list above (RegisterView → urls → test). Not yet committed.
